@@ -1,0 +1,14 @@
+# Ren'Py generated files
+*.rpyc
+*.rpyb
+
+# Logs
+log.txt
+traceback.txt
+errors.txt
+
+# Saves
+game/saves/
+
+# Cache
+game/cache/
