@@ -116,74 +116,60 @@ label monster_encounter:
 
     "Beyond the door, you spot the monster ahead. It's an eldritch horror, a twisted abomination formed from the discarded waste of cheap slime armor carelessly thrown away, pulsing with unnatural, corrosive energy."
 
+    # Initialize battle stats
+    $ player_max_hp = 100
     if gear == "slime":
-        "Your slime armor glistens in the dim light, making you feel agile but vulnerable to acid."
+        $ player_max_hp = 80  # Vulnerable
     elif gear == "repaired":
-        "Your patched armor creaks as you move, sturdy but potentially noisy."
+        $ player_max_hp = 120  # Sturdy
+    $ player_hp = player_max_hp
+    $ enemy_hp = 150
+    $ battle_log = []
+    $ player_defending = False
+
+    # Battle loop
+    while player_hp > 0 and enemy_hp > 0:
+        show screen battle_screen
+        $ action = ui.interact()
+
+        if action == "attack":
+            $ damage = renpy.random.randint(20, 40)
+            if gear == "well_made":
+                $ damage += 10
+            $ enemy_hp -= damage
+            $ battle_log.append("You attack for [damage] damage!")
+        elif action == "defend":
+            $ player_defending = True
+            $ battle_log.append("You defend, reducing damage next turn.")
+        elif action == "potion":
+            $ damage = 30
+            if gear == "slime":
+                $ damage -= 10  # Slippery
+            $ enemy_hp -= damage
+            $ battle_log.append("You throw a potion for [damage] damage!")
+        elif action == "flee":
+            $ battle_log.append("You flee the battle!")
+            jump flee_ending
+
+        # Enemy turn
+        if enemy_hp > 0:
+            $ enemy_damage = renpy.random.randint(15, 30)
+            if player_defending:
+                $ enemy_damage //= 2
+                $ player_defending = False
+            if gear == "repaired":
+                $ enemy_damage -= 5
+            $ player_hp -= enemy_damage
+            $ battle_log.append("The Eldritch Horror attacks for [enemy_damage] damage!")
+
+    hide screen battle_screen
+
+    if player_hp <= 0:
+        jump defeat_ending
     else:
-        "Your well-made armor feels comfortable and protective."
+        jump victory_ending
 
-    menu:
-        "Charge in with your sword":
-            jump charge_attack
-        "Sneak up quietly":
-            jump sneak_attack
-        "Use a potion":
-            jump potion_attack
 
-label charge_attack:
-
-    "You charge at the monster!"
-
-    monster "A guttural, echoing screech fills the air!"
-
-    if gear == "slime":
-        "Your slime armor dissolves quickly under the monster's acid, and you take heavy damage but manage to defeat it."
-        "You return to town wounded but victorious."
-    elif gear == "repaired":
-        "Your sturdy repaired armor absorbs the blows, and you defeat the monster with ease."
-        "You return to town as a hero, your armor battered but intact."
-    else:
-        "Your well-made armor protects you perfectly, and you defeat the monster efficiently."
-        "You return to town looking pristine and heroic."
-
-    return
-
-label sneak_attack:
-
-    "You sneak up and strike from behind."
-
-    if gear == "slime":
-        "Your slippery slime armor lets you move silently and strike precisely."
-        "You defeat the monster without it noticing."
-        "You return to town stealthily, avoiding any attention."
-    elif gear == "repaired":
-        "Your creaky armor makes a noise, alerting the monster slightly, but you still defeat it."
-        "You return to town with some scratches."
-    else:
-        "Your well-made armor allows smooth movement, and you defeat the monster cleanly."
-        "You return to town admired for your skill."
-
-    return
-
-label potion_attack:
-
-    "You throw a potion at the monster."
-
-    if gear == "slime":
-        "The slime armor's slick surface makes you slip during the throw, but the potion still hits."
-        "The monster is confused, and you defeat it, though you injure yourself slipping."
-        "You return to town limping but successful."
-    elif gear == "repaired":
-        "Your repaired armor is steady, and the potion explodes perfectly."
-        "You defeat the monster cleverly."
-        "The town praises your ingenuity."
-    else:
-        "Your well-made armor provides perfect balance for the throw."
-        "The potion works flawlessly, and you defeat the monster effortlessly."
-        "You return as the town's greatest hero."
-
-    return
 
 label decline_quest:
 
@@ -194,3 +180,63 @@ label decline_quest:
     "You leave town without adventure."
 
     return
+
+label victory_ending:
+
+    "You have defeated the Eldritch Horror!"
+
+    if gear == "slime":
+        "Despite your armor dissolving, you stand victorious."
+    elif gear == "repaired":
+        "Your sturdy armor held, and the town cheers your bravery."
+    else:
+        "Your well-made armor shines, and you are hailed as a legend."
+
+    "You return to town as a hero."
+
+    return
+
+label defeat_ending:
+
+    "The Eldritch Horror overwhelms you. You fall in the sewers."
+
+    "But wait, a townsfolk finds you and drags you back. You live to fight another day."
+
+    "You return to town defeated but alive."
+
+    return
+
+label flee_ending:
+
+    "You flee from the battle, leaving the sewers behind."
+
+    "The town is disappointed, but you survive."
+
+    return
+
+screen battle_screen:
+    frame:
+        xalign 0.5
+        yalign 0.5
+        vbox:
+            text "Battle!" size 40
+            hbox:
+                vbox:
+                    text "[player_name]" size 20
+                    bar value player_hp range player_max_hp xmaximum 200
+                    text "HP: [player_hp]/[player_max_hp]"
+                vbox:
+                    text "Eldritch Horror" size 20
+                    bar value enemy_hp range 150 xmaximum 200
+                    text "HP: [enemy_hp]/150"
+            vbox:
+                textbutton "Attack" action Return("attack")
+                textbutton "Defend" action Return("defend")
+                textbutton "Potion" action Return("potion")
+                textbutton "Flee" action Return("flee")
+            viewport:
+                scrollbars "vertical"
+                mousewheel True
+                vbox:
+                    for log_entry in battle_log[-5:]:
+                        text log_entry
