@@ -215,28 +215,53 @@ label flee_ending:
     return
 
 screen battle_screen:
+    # Background
+    add Solid("#000000")  # Black background for JRPG feel
+
+    # Top: HP Bars
     frame:
         xalign 0.5
-        yalign 0.5
-        vbox:
-            text "Battle!" size 40
-            hbox:
-                vbox:
-                    text "[player_name]" size 20
-                    bar value player_hp range player_max_hp xmaximum 200
-                    text "HP: [player_hp]/[player_max_hp]"
-                vbox:
-                    text "Eldritch Horror" size 20
-                    bar value enemy_hp range 150 xmaximum 200
-                    text "HP: [enemy_hp]/150"
+        yalign 0.05
+        background Solid("#333333")
+        padding (20, 10)
+        hbox:
+            spacing 50
             vbox:
-                textbutton "Attack" action Return("attack")
-                textbutton "Defend" action Return("defend")
-                textbutton "Potion" action Return("potion")
-                textbutton "Flee" action Return("flee")
-            viewport:
-                scrollbars "vertical"
-                mousewheel True
-                vbox:
-                    for log_entry in battle_log[-5:]:
-                        text log_entry
+                text "[player_name]" color "#FFFFFF" size 24
+                bar value player_hp range player_max_hp xmaximum 300 ysize 20
+                text "HP: [player_hp]/[player_max_hp]" color "#FFFFFF" size 18
+            vbox:
+                text "Eldritch Horror" color "#FF0000" size 24
+                bar value enemy_hp range 150 xmaximum 300 ysize 20
+                text "HP: [enemy_hp]/150" color "#FFFFFF" size 18
+
+    # Center: Battle Title
+    text "Battle!" xalign 0.5 yalign 0.3 size 48 color "#FFFF00"
+
+    # Bottom: Command Buttons
+    frame:
+        xalign 0.5
+        yalign 0.9
+        background Solid("#444444")
+        padding (20, 10)
+        hbox:
+            spacing 20
+            textbutton "Attack" action Return("attack") text_size 24
+            textbutton "Defend" action Return("defend") text_size 24
+            textbutton "Potion" action Return("potion") text_size 24
+            textbutton "Flee" action Return("flee") text_size 24
+
+    # Message Window: Bottom overlay
+    frame:
+        xalign 0.5
+        yalign 0.7
+        background Solid("#222222")
+        padding (20, 10)
+        xmaximum 800
+        ymaximum 150
+        viewport:
+            scrollbars "vertical"
+            mousewheel True
+            vbox:
+                for log_entry in battle_log[-5:]:
+                    text log_entry color "#FFFFFF" size 20
