@@ -1,7 +1,7 @@
 # Declare characters used by this game.
 define adventurer = Character("[player_name]")
 define townsfolk = Character("Townsfolk")
-define monster = Character("Sewer Monster")
+define monster = Character("Eldritch Horror")
 
 # The game starts here.
 label start:
@@ -99,7 +99,22 @@ label to_sewers:
 
     "Inside the sewers, it's dark and damp. You hear a growl in the distance."
 
-    "You spot the monster ahead."
+    "You come across an ancient inscription on the wall: 'To proceed, answer me this: I am not alive, but I grow; I don't have lungs, but I need air; I don't have a mouth, but water kills me. What am I?'"
+
+    menu:
+        "Fire":
+            "Correct! The inscription glows, and a hidden door opens."
+            jump monster_encounter
+        "Plant":
+            "Wrong. The wall rumbles, but you can try again."
+            jump to_sewers
+        "Wind":
+            "Wrong. The wall rumbles, but you can try again."
+            jump to_sewers
+
+label monster_encounter:
+
+    "Beyond the door, you spot the monster ahead. It's an eldritch horror, a twisted abomination formed from the discarded waste of cheap slime armor carelessly thrown away, pulsing with unnatural, corrosive energy."
 
     if gear == "slime":
         "Your slime armor glistens in the dim light, making you feel agile but vulnerable to acid."
@@ -120,7 +135,7 @@ label charge_attack:
 
     "You charge at the monster!"
 
-    monster "ROAR!"
+    monster "A guttural, echoing screech fills the air!"
 
     if gear == "slime":
         "Your slime armor dissolves quickly under the monster's acid, and you take heavy damage but manage to defeat it."
